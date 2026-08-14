@@ -1,1 +1,520 @@
+Yes. Based on your corrections, the document should **not frame ERCs as weak or non-enforcing**. It should explain that ARCOS is solving the **system-level architectural problem**, while the taxonomy determines **how ARCOS decides and builds a Module**.
+
+# Module Taxonomy: What Is a Module
+
+**Status: Ratified**
+
+## Why not just use ERCs directly?
+
+ERCs provide important capabilities and standards for NFTs. They are the foundation on which much of the NFT ecosystem is built.
+
+The problem is not that ERCs are useless or that they cannot enforce behavior. The problem is that the capabilities they introduce do not automatically become one governed, coordinated asset system.
+
+Three structural conditions create the need for an ARCOS Module architecture.
+
+### New capabilities can become fragmented
+
+As new NFT requirements appear, different proposals can emerge for the same or related capability.
+
+Rental, delegation, hierarchy, consumption, and other areas have accumulated multiple approaches that do not necessarily share one coherent model.
+
+A project choosing one proposal can therefore solve its immediate problem without resolving the broader capability into a common system.
+
+ARCOS needs to prevent that fragmentation internally.
+
+When several standards address the same underlying capability, ARCOS should not create several Modules simply because several ERCs exist.
+
+Instead, the capability is evaluated and, where appropriate, **unified into one ARCOS governed model**.
+
+### Capabilities may already be partially covered
+
+An ERC may already provide an important part of a capability.
+
+That does not mean the corresponding ARCOS Module is already built.
+
+The ERC may provide:
+
+* an interface;
+* a state model;
+* an implementation pattern;
+* or an established capability that ARCOS can reuse.
+
+ARCOS still has to determine how that capability belongs inside the operational asset architecture, how it interacts with other capabilities, what state ARCOS governs, and how the capability participates in MAS and Tier 3.
+
+The existence of ERC material therefore affects **how a Module is built**, not whether ARCOS needs to define the Module.
+
+### New capabilities may have no sufficient ERC foundation
+
+Some capabilities required by a programmable operational asset may not have an adequate existing ERC model.
+
+In that case ARCOS must define the required state, authority, rules, and lifecycle itself.
+
+This is not a failure of the ERC ecosystem.
+
+It is simply the point at which ARCOS must originate the capability because the required asset behavior has not been sufficiently standardized elsewhere.
+
+---
+
+# What is a Module?
+
+**A Module is a single governed state machine — a bounded piece of state ARCOS actively manages, with defined rules for how it changes, who is authorized to change it, and how the rest of the system can query and use it through MAS.**
+
+The defining property is **governed state**.
+
+A Module is not simply a collection of functions or a collection of ERC interfaces.
+
+It represents one coherent capability domain that ARCOS treats as an independently governed part of the asset.
+
+---
+
+## A Module is one state machine, not a collection of unrelated features
+
+A Module may draw from several sources:
+
+* an existing ERC;
+* several ERCs addressing the same capability;
+* established implementation patterns;
+* or entirely ARCOS-originated design.
+
+Those sources can be different.
+
+The resulting Module must nevertheless be one coherent governed state machine.
+
+For example:
+
+```text
+Existing ERC material
+        +
+Other related proposals
+        +
+ARCOS-defined requirements
+        ↓
+      Module
+        ↓
+ one governed state
+ one authority model
+ one rule system
+ one lifecycle
+```
+
+This is why ARCOS does not treat:
+
+> **one ERC = one Module**
+
+or:
+
+> **one feature = one Module.**
+
+Several ERCs can contribute to one Module, and an ARCOS Module can contain behavior that did not previously exist in an ERC.
+
+---
+
+# What makes a Module "governed"?
+
+**Governed means state plus authority.**
+
+A piece of data by itself is not a Module.
+
+For example:
+
+```text
+user = Bob
+```
+
+is simply state.
+
+A governed state machine defines:
+
+* who can create or modify that state;
+* under what conditions it can change;
+* what rules constrain the transition;
+* what other state it depends upon;
+* what happens when the state changes;
+* and how the rest of ARCOS can query or use the result.
+
+Conceptually:
+
+```text
+State
+  +
+Authority
+  +
+Rules
+  +
+Lifecycle
+      ↓
+Governed state machine
+```
+
+This is the distinction between a data holder and an ARCOS Module.
+
+---
+
+# How a Module is created
+
+The question is not:
+
+> **"Which ERC should become this Module?"**
+
+The correct question is:
+
+> **"What capability does the operational asset require, what state represents that capability, and what must ARCOS govern about that state?"**
+
+Module creation therefore follows a reasoning process.
+
+### Step 1 — Identify the capability
+
+First determine the actual capability the asset needs.
+
+Do not begin with the name of an ERC.
+
+For example:
+
+> The asset needs temporary usage rights separate from ownership.
+
+That is the capability.
+
+---
+
+### Step 2 — Identify the required state
+
+Determine what state is necessary to represent that capability.
+
+For example:
+
+```text
+Owner
+User
+Start
+Expiry
+```
+
+The important question is:
+
+> **What state must exist for the capability to actually operate?**
+
+---
+
+### Step 3 — Determine the authority and lifecycle
+
+Then determine:
+
+* who can create the state;
+* who can modify it;
+* what conditions permit modification;
+* when it expires;
+* what other state affects it;
+* and what operations depend on it.
+
+This turns a capability into a governed state machine.
+
+---
+
+### Step 4 — Check existing ARCOS state
+
+Before creating a Module, ask:
+
+> **Does this governed state already exist inside ARCOS?**
+
+If it does, the capability may belong to an existing Module as an Extension.
+
+If it does not, continue evaluating it as a possible Module.
+
+This is the primary protection against duplicate state.
+
+---
+
+### Step 5 — Examine existing standards
+
+Only after understanding the required ARCOS state should ERCs and other standards be examined.
+
+Ask:
+
+* What already exists?
+* What can be reused?
+* Are there multiple competing approaches?
+* What needs to be unified?
+* What needs to be adapted?
+* What does ARCOS still need to originate?
+
+The ERC landscape informs the construction of the Module.
+
+It does not determine the Module boundary by itself.
+
+---
+
+### Step 6 — Define the Module boundary
+
+The resulting state must have one clear owner.
+
+A Module should answer:
+
+> **What state does this Module own, and what decisions does that state govern?**
+
+If the answer is unclear, the Module boundary is not yet settled.
+
+---
+
+### Step 7 — Define its interaction with the system
+
+Finally, determine how the Module participates in the wider ARCOS architecture.
+
+Its state must be:
+
+* governed by its own rules;
+* available to MAS;
+* capable of participating in cross-module decisions;
+* and ultimately connected to the ARCOS execution architecture where required.
+
+This is what turns an individual state machine into part of the ARCOS system.
+
+---
+
+# Build patterns
+
+Once something has been determined to be a Module, a separate question remains:
+
+> **How much of the Module already exists, and what must ARCOS build?**
+
+A Module may use one or more of four patterns.
+
+### Reuse
+
+An existing ERC already provides a suitable interface or mechanism.
+
+ARCOS reuses it rather than unnecessarily creating a competing interface.
+
+### Unify
+
+Several ERCs address the same capability differently.
+
+ARCOS reconciles them into one coherent Module rather than reproducing their fragmentation.
+
+### Enforce
+
+An existing standard provides the capability or information required, but ARCOS requires additional enforcement within its operational execution architecture.
+
+ARCOS builds that missing enforcement around the governed Module state.
+
+### Originate
+
+No sufficient ERC foundation exists for the required capability.
+
+ARCOS defines the required state machine itself.
+
+These patterns describe **how the Module is built**.
+
+They do not determine **whether something is a Module**.
+
+---
+
+# Worked example: Rental
+
+Rental demonstrates why Module classification must come from the state model rather than from the existence of an ERC.
+
+The capability is:
+
+> **temporary usage of an asset by someone other than its owner.**
+
+The required state can be represented through concepts such as:
+
+```text
+Owner
+User
+Start
+Expiry
+```
+
+Under the current ARCOS Ownership model, that usage relationship is treated as an extension of the Ownership state rather than as an independently governed asset domain.
+
+Therefore:
+
+**Rental → Extension of Ownership.**
+
+The ERCs addressing rental provide useful material, but their existence does not automatically create a Rental Module.
+
+The ARCOS decision comes from the relationship between the required rental state and the existing Ownership state.
+
+---
+
+# Worked example: Composition
+
+Composition demonstrates the opposite case.
+
+The capability involves relationships such as:
+
+* parent and child assets;
+* containment;
+* hierarchy;
+* account-controlled execution;
+* composition lifecycle.
+
+The required state is not simply another rule over Ownership.
+
+It represents an independently meaningful relationship domain.
+
+Therefore:
+
+**Composition → Module.**
+
+The fact that several ERCs address different aspects of composition does not create several Modules.
+
+ARCOS evaluates the underlying capability and builds **one governed Composition state machine**.
+
+---
+
+# Module vs. Extension vs. Standard
+
+The taxonomy follows from the reasoning above.
+
+| Type          | What it represents                                               | Core question                                                                               |
+| ------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| **Module**    | An independently governed capability/state domain                | Does ARCOS need to govern this capability as its own state machine?                         |
+| **Extension** | A specialization, restriction, or policy over an existing Module | Can the capability be completely governed through an existing Module's state and authority? |
+| **Standard**  | An external interface or communication mechanism                 | Is this primarily about how external systems communicate with or discover ARCOS?            |
+
+The distinction is therefore about **responsibility and state ownership**, not about whether something happens to have an ERC.
+
+---
+
+# Cross-cutting concerns
+
+Some concepts are used by multiple Modules without representing an independent capability domain.
+
+**Time** is an example.
+
+Rental, vesting, licensing, permissions, and other behaviors may all depend on:
+
+```text
+start
+end
+expiry
+duration
+```
+
+But that does not automatically make Time a Module.
+
+It is a **cross-cutting attribute** consumed by other governed state machines.
+
+---
+
+# One capability, one authoritative state owner
+
+A capability can participate in multiple operations without being owned by multiple Modules.
+
+The rule is:
+
+> **One governed state has one authoritative Module.**
+
+For example, if Permission owns authorization state:
+
+```text
+Permission
+    ↓
+authorization state
+```
+
+Transfer does not create another authorization state.
+
+Instead:
+
+```text
+Transfer operation
+        ↓
+       MAS
+        ↓
+Permission state
+        +
+other relevant Module state
+        ↓
+coordinated decision
+        ↓
+Transfer execution
+```
+
+Transfer consumes the authorization result.
+
+It does not duplicate the state.
+
+This prevents multiple Modules from developing competing sources of truth.
+
+---
+
+# What this prevents
+
+### Module explosion
+
+A newly discovered capability does not automatically become a new Module.
+
+First ask:
+
+> **Is this genuinely a new governed state machine, or can it be represented through an existing Module?**
+
+A new ERC does not automatically mean a new Module.
+
+---
+
+### Fragmentation inside ARCOS
+
+If several proposals address the same underlying capability, ARCOS should not reproduce that fragmentation internally.
+
+Instead:
+
+```text
+Several approaches
+       ↓
+    STGF
+       ↓
+one capability model
+       ↓
+one ARCOS Module
+```
+
+---
+
+### Duplicate state
+
+If two Modules appear to need the same information, determine which Module should own the authoritative state.
+
+If the second Module only needs to use that state, it should query it through MAS rather than create another copy.
+
+---
+
+### Confusing ERC coverage with completed ARCOS work
+
+An ERC can already provide valuable capability material without meaning that the ARCOS Module is complete.
+
+The Module may still require:
+
+* reconciliation;
+* state design;
+* governance;
+* additional rules;
+* enforcement;
+* MAS integration;
+* and Tier 3 integration.
+
+Existing ERCs determine **what ARCOS can reuse**.
+
+They do not determine **how much of the ARCOS Module remains to be built**.
+
+---
+
+# The governing principle
+
+ARCOS does not build Modules simply because ERCs exist.
+
+ARCOS does not build Modules simply because ERCs are missing.
+
+ARCOS builds a Module when the operational asset requires a **distinct capability to exist as an independently governed state machine**.
+
+That Module may reuse existing standards, unify competing approaches, extend existing behavior, or originate entirely new state.
+
+The final objective is always the same:
+
+> **One coherent governed capability that can participate in the ARCOS system through MAS and the Tier 3 execution architecture.**
+
+The taxonomy therefore keeps ARCOS:
+
+**capability-complete without becoming capability-fragmented.**
 
