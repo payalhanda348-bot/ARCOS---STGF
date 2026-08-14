@@ -7,13 +7,11 @@ ARCOS makes an NFT a Programmable, Operational Digital Asset — not by replacin
 ## Read this in order
 
 1. **This README** — the problem, the core finding, how the repo works
-2. [`module-taxonomy.md`](./specs/module-taxonomy.md) — what makes something a Module vs. Extension vs. Standard, and how each module gets built once it's classified
-3. `modules/` — each of the eight modules, ERC-mapped, spec status varies
-4. `mas.md` — the coordination layer
-5. `tier-3.md` — the enforcement model
-6. `erc-capability-mapping.md` — the full sort, every ERC against the taxonomy
+2. [`module-taxonomy.md`](./specs/module-taxonomy.md) — what makes something a Module vs. Extension vs. Standard, and how each module gets built once it's classified.  `modules/` — each of the eight modules, ERC-mapped, spec status varies
+3. `mas.md` — the coordination layer
+4. `tier-3.md` — the enforcement model
 
-Items 3–6 are in progress; this document and the taxonomy are current as of this writing.
+
 
 ## The problem
 
