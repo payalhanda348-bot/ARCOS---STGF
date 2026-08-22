@@ -1,3 +1,6 @@
+What is Module: A Module is a governed state machine: one structured domain of state, owned by exactly one authority, changed only through defined transitions, reachable by the rest of the system only through MAS.
+
+
 My POV: **the six layers should not be a fixed six-part structure that every Module must literally implement.** That would eventually force the architecture to fit the template instead of letting the capability determine the architecture.
 
 I would make a distinction between **mandatory architectural dimensions** and **optional/conditional layers**.
