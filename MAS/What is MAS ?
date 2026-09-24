@@ -1,1 +1,96 @@
-
+MAS	-	Module	Activation	System
+ARCOS	-	Specification,	Testing	&	Governance	Framework
+Status:	Research,	not	implemented.	This	document	describes
+the	intended	coordination	layer.	It	has	been	reasoned	through
+and	revised	across	several	rounds	of	internal	review,	but	it	has
+not	been	built	as	live	infrastructure	-	it	exists	today	only	as	an
+off-chain	TypeScript	orchestrator	inside	the	v0.5	prototype,	with
+no	deployed	on-chain	enforcement.	Treat	every	mechanism
+below	as	a	design	proposal,	not	a	working	system.
+What	MAS	Is
+MAS	(Module	Activation	System)	is	the	only	coordination	layer
+between	Modules.
+No	Module	ever	calls	another	Module	directly.	Every	interaction
+between	Modules	-	a	Transfer	checking	Ownership,	a	Permission
+lookup,	an	aggregation	across	several	Modules	at	once	-	happens
+through	MAS.
+MAS	is	what	makes	independently	governed	Modules	composable
+instead	of	each	one	having	to	hand-wire	calls	into	every	other
+Module	it	might	interact	with.
+What	MAS	Actually	Does
+Routing	-	MAS	is	the	only	entry	point	into	a	Module’s	state	or
+logic.
+Aggregation	-	when	an	operation	needs	input	from	more	than	one
+Module,	MAS	collects	each	one’s	check	and	returns	a	single
+decision.	No	Module	needs	to	know	the	others	exist.
+No	duplicate	state	-	if	one	Module’s	state	answers	a	question
+another	Module	needs,	the	second	queries	the	first	through	MAS
+instead	of	holding	its	own	copy	of	that	state.
+How	MAS	Connects	to	Native
+Enforcement
+Native	Enforcement	does	not	decide	anything	itself	-	the	on-chain
+contract	only	verifies	a	signed	decision.
+MAS	is	what	computes	that	decision.	Native	Enforcement’s	entire
+guarantee	is	only	as	strong	as	what	MAS	decides	and	signs.
+Today:	MAS	runs	off-chain,	in	TypeScript,	operated	entirely	by
+ARCOS.	There	is	no	deployed	on-chain	enforcement	contract	yet,
+and	no	independent	party	checking	MAS’s	decisions.
+Who	Runs	MAS,	Today
+ARCOS,	alone.	This	should	be	stated	plainly	wherever	MAS	is
+described,	not	left	implicit.
+The	honest	current	claim	is:	a	well-governed,	permissioned
+service	-	not	trustless	infrastructure.	That	becomes	true	only	if
+and	when	MAS’s	decision-making	is	no	longer	solely	ARCOS’s	to
+make.
+The	Real,	Cautionary	Precedent
+OpenSea	built	a	similar	centralized-checker	pattern	for	royalty
+enforcement	-	the	Operator	Filter	Registry	-	and	deprecated	it	in
+2023.
+The	failure	that	killed	it:	a	legitimate	token	owner	could	be	blocked
+from	moving	their	own	token	indefinitely,	with	no	override,
+because	one	centralized	authority	made	the	call	and	there	was	no
+way	around	a	bad	or	stuck	decision.
+MAS,	as	currently	designed,	has	the	identical	shape:	a	centralized
+decision-maker	whose	signature	gates	whether	a	transfer	or
+operation	completes.	The	risk	is	not	hypothetical	-	it	has	already
+played	out	once	in	a	closely	comparable	system.
+The	Two	Separate	Problems,	and
+Why	They	Need	Different	Fixes
+These	get	conflated	easily,	and	they	need	different	solutions:
+1.	Who	decides?	-	currently	ARCOS	alone.	Decentralizing	this	is	a
+real,	valuable,	and	expensive	direction	-	options	range	from	a
+federated	multi-signer	set	(a	fixed	group	of	known	operators,
+majority-signature	required)	to	a	staked	validator	set	(closer	to
+running	a	small	consensus	system,	comparable	in	cost	to	the
+“ARCOS	chain”	proposal).	This	is	credible	future	work,	not	a	near
+term	fix.
+2.	What	happens	when	the	decider	is	wrong,	unavailable,	or
+contested?	-	this	is	currently	unsolved	regardless	of	who’s
+deciding.	A	federated	MAS	with	no	escape	hatch	has	the	exact
+same	failure	mode	as	a	centralized	one,	just	voted	on	by	more
+people.	This	is	the	part	that	actually	caused	OpenSea’s	system	to
+fail,	and	it	is	fixable	now,	independent	of	decentralization.
+What	an	Escape	Hatch	Needs	to
+Guarantee
+Not	yet	designed,	but	the	requirement	is	clear	from	the	OpenSea
+precedent:	a	legitimate	owner	must	never	be	permanently	blocked
+because	MAS	is	unavailable,	wrong,	or	unresponsive.	Candidate
+mechanisms,	none	yet	chosen:
+A	timeout:	if	MAS	does	not	respond	within	a	defined	window,	the
+operation	falls	back	to	an	unrestricted	native	transfer.
+An	on-chain	override	path,	usable	under	narrowly	defined
+conditions.
+A	defined	“MAS	unavailable”	state	that	the	contract	can	detect	and
+act	on	independently.
+Open,	Unresolved	Points
+Whether	Transfer’s	decision	draws	on	all	Modules	unconditionally,
+or	only	Modules	with	a	transfer-relevant	stake,	is	undecided	-	this
+affects	both	the	gas-cost	model	(Native-Enforcement.md)	and	how
+much	surface	area	a	MAS	failure	has.
+No	escape-hatch	mechanism	has	been	designed	or	chosen	yet.
+No	path	to	decentralizing	MAS’s	decision-making	has	been
+specified	beyond	naming	federated	multi-sig	as	the	more	credible
+near-term	option	over	full	validator	decentralization.
+Versioning	and	authentication	of	MAS’s	decisions	against	an
+immutable	on-chain	contract,	as	the	off-chain	logic	evolves,	is	an
+open	problem
