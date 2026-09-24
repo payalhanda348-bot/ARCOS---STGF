@@ -1,1 +1,44 @@
+# Native-Enforcement.md
 
+## What Native Enforcement Is
+
+- **Native Enforcement** is the model where a capability is only real if it's compiled into the NFT contract at deployment — not bolted on afterward, not asserted by an external service.
+- This replaces the earlier internal name "Tier 3." That name only meant something in contrast to two rejected alternatives (external wrapper approaches); calling it "Native Enforcement" describes the mechanism itself, with no dependency on that history.
+
+## The Two Deployment Paths
+
+- **Retrofit path** — an external contract (e.g. `ARCOSAnchor.sol`) reads `ownerOf()` and other state on an existing, unmodified ERC-721, without changing that base contract.
+- **Native path** — the NFT contract itself (`ARCOS.sol` extending ERC-721 directly) is built from deployment to route through ARCOS's enforcement logic.
+- Only the native path closes the actual enforcement gap. The retrofit path can observe and report state, but cannot stop a bypass.
+
+## The Bypass Problem
+
+- On a retrofit anchor, the token's owner can call `transferFrom()` directly on the base contract. This bypasses ARCOS's governance entirely — no check, no rejection, no record.
+- This holds for any operation that already exists as a callable function on a deployed ERC-721. External wrapping can watch it happen; it cannot prevent it.
+- Operational capabilities that have no function slot at all on an unmodified contract — delegation, custody, rental as first-class operations — cannot be added externally either way. They only exist if the contract is built to support them from deployment.
+
+## What's Enforceable Where
+
+- **Fully enforceable on any existing ERC-721, retrofit or native:** Ownership (read-level), Permission, Verification, Composition.
+- **Requires native deployment:** full visibility of programmability to Etherscan and marketplaces; the Ownership capabilities themselves (Delegation, Custody, Rental, Shared Ownership) as live, callable, enforced operations.
+- **Cannot surface on Etherscan under either path:** Ownership capability state, due to ERC-721's own data model — this is a display limitation, not an enforcement one.
+
+## How Native Enforcement Works, Mechanically
+
+- Three ERC-mandated hooks remain separate, since external tools call them by name: `transferFrom()`, `tokenURI()`, `royaltyInfo()`. Each calls into `ModuleRegistry.sol`.
+- Every other ARCOS-native operation (delegation, custody, rental activation, and so on) runs through one generic dispatcher — `executeModuleOperation(moduleId, operationData, masSignature)` — rather than one bespoke hook per capability. This keeps bytecode and deployment cost from scaling with the number of Modules.
+- The Transfer hook makes one call to MAS, not direct calls to each Module. MAS aggregates checks from only the Modules with a transfer-relevant stake, and returns one signed decision that the contract verifies. This keeps per-call gas cost independent of how many Modules exist.
+- Discovery is kept separate from execution: functions like `activeModules()` and `moduleState()` report decisions already made — they never execute Module logic themselves. Only the Transfer hook makes a live decision inside the NFT's own contract.
+- A Module Discovery Interface (ERC-165–style `supportsInterface` pattern) is proposed as its own ARCOS-authored standard, distinct from the three ERC-mandated hook slots, to advertise which ARCOS capabilities a given NFT supports.
+
+## Execution Model
+
+- MAS and Module logic compute the decision off-chain; a signed, authorized result is returned to the contract.
+- The NFT contract only verifies the signature and records the final state or emits an event — it never runs MAS or Module logic itself.
+- Cross-chain: all MAS/Module computation runs on ARCOS's own chain; verification of the result happens on the destination chain's own smart contract via a thin per-chain verifier. This replaces needing a separate implementation of every Module on every chain.
+
+## Open, Unresolved Points
+
+- Gas-efficient design for `ModuleRegistry.sol` / `ARCOSAnchor.sol` / MAS / Modules is still an open design task, and may affect the discovery-interface design.
+- Whether each Module needs a different modifier or hook mapping depending on which existing function slots its operations touch (Ownership vs. Royalty vs. Metadata differ) is raised but not settled.
+- The dependency this execution model creates on ARCOS's own chain is a significant infrastructure commitment, not yet weighed against the simpler alternative it replaces (off-chain computation with per-chain signature verification and no dedicated chain at all).
