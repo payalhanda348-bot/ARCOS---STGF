@@ -1,1 +1,98 @@
-
+Module
+ARCOS	—	Specification,	Testing	&	Governance	Framework
+What	a	Module	Is
+A	Module	is	governed,	reusable,	composable,	evolvable
+infrastructure	—	not	a	collection	of	capabilities	bolted	onto	a
+contract.
+It	is	one	coherent	domain	of	a	digital	asset’s	behavior,	built	once	as
+reusable	machinery	instead	of	welded	per-project	into	each	NFT
+contract.
+Definition:	A	Module	is	a	governed	state	machine	—	one	structured
+domain	of	state,	owned	by	exactly	one	authority,	changed	only
+through	defined	transitions,	reachable	by	the	rest	of	the	system
+only	through	MAS.
+A	capability	is	what	a	Module	can	do.	The	Module	is	the	machinery
+that	determines	how,	when,	and	under	whose	authority	that
+capability	operates.
+The	Problem	This	Solves
+Fragmentation	—	capability	logic	for	an	NFT	(delegation,	custody,
+rental,	verification,	royalty	enforcement,	and	so	on)	is	scattered
+across	separate	ERC	extensions	and	custom	code,	each	solving	one
+piece	with	no	shared	coordination	between	them.	The	ERCs	and
+extensions	themselves	are	sound	—	the	gap	is	that	nothing
+coordinates	them	once	a	project	adopts	more	than	one.
+Custom-built,	one-off	models	—	every	project	re-derives	its	own
+logic	for	how	these	capabilities	should	behave,	from	scratch,
+because	there	is	no	reusable	governed	machinery	to	build	on
+instead.
+Frozen,	not	evolvable	—	once	a	contract	is	deployed,	that	custom
+logic	is	fixed.	Adding	a	new	capability	later,	or	changing	how	an
+existing	one	behaves,	isn’t	possible	without	a	new	deployment	and
+a	migration.
+Not	reusable	—	the	coordination	logic	one	project	writes	to	make
+its	capabilities	work	together	cannot	be	picked	up	and	reused	by
+the	next	project.	Every	project	pays	this	cost	again,	independently.
+Not	composable	—	capabilities	built	as	bespoke,	project-specific
+code	don’t	interoperate.	There’s	no	shared	layer	for	two
+capabilities	on	the	same	token	to	coordinate	through	when	they
+collide.
+The	Six	Fixed	Questions
+Every	Module	answers	the	same	six	architectural	questions.	The
+questions	are	universal;	the	answers	and	mechanisms	are	domain
+specific.
+1.	State	/	Structure	—	what	the	Module	owns,	and	what	that	state
+means
+2.	Authority	—	who	can	cause	that	state	to	change
+3.	Transitions	—	how	the	state	legitimately	changes
+4.	Invariants	/	Rules	—	what	must	hold	true	before	and	after	a	change
+5.	Lifecycle	&	History	/	Provenance	—	how	the	state	exists	and
+evolves	over	time
+6.	System	Interaction	—	how	the	rest	of	ARCOS	reads	and	triggers
+this	state,	exclusively	through	MAS
+What	Is	Not	Universal
+Beyond	the	six	fixed	questions,	a	Module	may	adopt	additional
+mechanisms	—	recovery	paths,	versioning,	staged/two-phase
+transitions,	time-bound	state,	sub-delegation	of	authority,	and
+others	—	but	only	where	its	own	domain	actually	has	that	need.
+These	mechanisms	are	not	layers	every	Module	must	implement.
+They	are	optional	answers	to	the	six	questions,	not	additional
+questions.
+Whether	a	Module	needs	any	given	mechanism	is	decided	by	its
+domain,	not	by	precedent	from	another	Module.	One	Module
+needing	a	recovery	path	doesn’t	imply	the	next	one	does.
+Example:	a	Module	whose	state	is	issued	and	later	invalidated	(an
+attestation,	a	certification)	may	need	no	recovery	mechanism	at	all
+—	an	invalid	record	is	revoked,	not	recovered.	A	Module	whose
+state	represents	a	claim	that	can	be	lost	or	contested	may	need
+one.	Both	are	correct	for	their	own	domain.
+The	Four	Properties
+The	four	properties	are	the	outcome	of	answering	the	six	questions
+well	—	not	four	inputs	that	generate	the	six	questions.
+Governed	—	the	whole	architecture	operates	through	the	state
+machine;	no	path	around	it.
+Reusable	—	any	NFT	can	adopt	the	Module	without	assembling
+custom	logic,	subject	to	trusting	whatever	currently	executes	MAS.
+Composable	—	Modules	connect	to	each	other	only	through	MAS;
+no	Module	calls	another	directly.
+Evolvable	—	capabilities	and	mechanisms	evolve;	the	governed
+state	model	and	the	six-question	architecture	stay	constant
+underneath	that	evolution.
+MAS:	The	Only	Path	Between
+Modules
+No	Module	ever	calls	another	Module	directly.
+Routing	—	MAS	is	the	only	entry	point	into	a	Module.
+Aggregation	—	when	an	operation	needs	input	from	multiple
+Modules,	MAS	collects	each	one’s	check	and	returns	a	single
+decision;	no	Module	needs	to	know	the	others	exist.
+No	duplicate	state	—	if	one	Module’s	state	answers	a	question
+another	Module	needs,	the	second	queries	the	first	through	MAS
+instead	of	holding	its	own	copy.
+Status
+This	framework	has	been	validated	against	one	domain:
+Ownership.
+The	other	planned	Modules	(Transfer,	Permission,	Metadata,
+Verification,	Royalty,	Composition,	Security)	are	scoped	at	this
+framework	but	not	yet	built	out	to	the	same	depth.
+Composable	and	Evolvable	are	demonstrated	as	design	intent;	they
+have	not	yet	been	proven	across	more	than	one	Module.
+See	Ownership.md	for	the	framework	worked	through	in	full
